@@ -1,0 +1,54 @@
+int  vaciarMostrarDetalleYProm_MIO(tLista *p, FILE *fp,
+                                   int (*compararFinal)(const void *, const void *),
+                                   int (*acumularCalif)(void **, unsigned *,
+                                                   const void *, unsigned),
+                                   void (*mostrarFinal)(const void *, FILE *),
+                                   void (*mostrarProm)(const void *, int, FILE *))
+{
+    int cantElim = 0, cantCalif;
+    tNodo *act = *p;
+
+    //Si ACT no es NULL, se da comienzo
+    if(act)
+    {
+        //Llevamos ACT hasta el comienzo de la lista
+        while(act->ant)
+            act = act->ant;
+
+        //Mientras ACT no sea NULL
+        while(act)
+        {
+            cantCalif = 0;                  //La cantidad de calificaciones comienza en 0
+            tNodo *aux = act->sig;          //AUX se invoca como el siguiente de ACT
+            mostrarFinal(NULL, fp);         //Mostramos la cabecera del segmento a eliminar
+            mostrarFinal(act->info, fp);    //Mostramos el primer Registro
+            cantCalif++;                    //Aumenta el contador de calificaciones
+
+            //PROCESO DE ACUMULACIÓN:
+            //Mientras AUX tenga el mismo dni que ACT
+            while(aux && compararFinal(act->info, aux->info) == 0)
+            {
+                mostrarFinal(aux->info, fp);                                            //Mostramos AUX
+                cantCalif++;                                                            //Aumenta el contador de calificaciones
+                acumularCalif(&act->info, &(act->tamInfo), aux->info, aux->tamInfo);    //Acumulamos la nota en ACT
+                aux = aux->sig;                                                         //Avanza AUX
+            }
+            mostrarProm(act->info, cantCalif, fp);  //Mostramos el Promedio
+            if(aux)
+                aux->ant = NULL;                    //Desvinculamos todo antes de AUX
+
+            //PROCESO DE ELIMINACIÓN:
+            //Mientras ACT sea diferente de AUX
+            while(act != aux)
+            {
+                tNodo *aux2 = act;  //Invocamos un AUX2 en la posicion de ACT
+                act = act->sig;     //ACT Avanza
+                free(aux2->info);   //liberamos la info y el nodo
+                free(aux2);
+                cantElim++;         //Aumenta cantidad de eliminados
+            }
+        }
+        *p = NULL;      //a P se le asigna valor NULL, ya que la lista está vacía
+    }
+    return cantElim;
+}
