@@ -1,0 +1,87 @@
+tNodo *getMaxNodo(tNodo *p,
+       int (*comp)(const void *, const void *))
+{
+    tNodo *act = p,
+          *max = NULL;
+
+    int ocurrencias,      //contador de repeticiones
+        maxOcurrencia=1;  //guardara el maximo
+
+     /*para los fines de este ejercicio y teniendo en cuenta
+    la escasa cantidad de alumnos utilizaremos un vetor para
+    realizar un control de los registros que se cuentan con el
+    fin de evitar contar registros ya contados */
+    long dniContados[MAX_TAM_AL];
+    limpiarVector(dniContados, MAX_TAM_AL);
+
+
+
+    if (!act)
+        return NULL;
+
+    //mientras exista siguiente
+    while (act->sig)
+    {
+
+        if (!fueContado(dniContados, act->info))
+        {
+                tNodo *aux = act->sig;
+
+                //inicializams en 1 por el elemento actual
+                ocurrencias = 1;
+
+                //y contamos a partir del siguiente
+                while (aux)
+                {
+                    //comparo actual con sig y si son iguales cuento
+
+                    if (comp && !comp(act->info, aux->info))
+                        ocurrencias++;
+                    //avanzo
+                    aux = aux->sig;
+                }
+                //buscamos maximo
+                if (ocurrencias > maxOcurrencia)
+                {
+                    maxOcurrencia = ocurrencias;
+                    //guardamos el primero de los que estamos contando
+                    max = act;
+
+                }
+
+        }
+
+        act = act->sig;
+
+    }
+
+//retornamos el nodo solo si existe mas de uno.
+if(maxOcurrencia>1)
+    return max;
+return NULL;
+
+}
+
+int fueContado(long *ptr, void *d)
+{
+    long dni = normalizarDNI(((tFinal *)d)->dni);
+
+    while(*ptr)
+    {
+        if ( *ptr == dni)
+            return 1;
+         ptr++;
+    }
+    *ptr = dni;
+    return 0;
+
+
+}
+
+
+void limpiarVector(long * ptr, size_t tam)
+{
+    int i;
+    for(i = 0; i<tam; ++i)
+        ptr[i]=0;
+}
