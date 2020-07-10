@@ -1,0 +1,123 @@
+typedef struct
+{
+    char dni[11];
+    int cant;
+}tIndex;
+
+//BUSCAR Nodo mas repetido recibe el comienzo de la lista, y la cantidad de elementos en la misma.
+//te busca el ultimo nodo de la lista con el dni mas repetido respetando orden cronologico
+tNodo * buscarMasRepetido(tNodo *, int);
+
+tNodo * buscarMasRepetido(tNodo *p, int cantNodos)
+{
+    tNodo *n = p, *n2 = p;
+    tIndex *vec = (tIndex*)calloc(cantNodos, sizeof(tIndex));
+    int i, pos = 0, found, mayor = 0, posMayor = 0;
+
+    while(n)
+    {
+        found = 0;
+        for(i = 0; i < pos; i++)
+        {
+            if(strcmp(vec[i].dni, ((tFinal*)n->info)->dni) == 0)
+            {
+                vec[i].cant++;
+                found = 1;
+                break;
+            }
+        }
+        if(!found)
+        {
+            strcpy(vec[pos].dni, ((tFinal*)n->info)->dni);
+            vec[pos].cant = 1;
+            pos++;
+        }
+        n = n->sig;
+    }
+    //Recorrido inverso para grabar el Mayor
+    for(i = pos; i >= 0; i--)
+    {
+        if(vec[i].cant > mayor)
+            posMayor = i;
+    }
+
+    //Buscamos Nodo
+    while(strcmp(vec[i].dni, ((tFinal*)n2->info)->dni) == 0)
+        n2 = n2->sig;
+
+    //printf("El siguiente a ordenar es: %s", ((tFinal*)n2->info)->apYNom);
+    return n2;
+
+}
+int getCantidadNodosDesdeIni(tNodo*);
+
+int getCantidadNodosDesdeIni(tNodo * ini)
+{
+    int cantNodos = 1;
+    tNodo * b = ini;
+    while(b->sig)
+    {
+        b = b->sig;
+        cantNodos++;
+    }
+    free(b);
+    return cantNodos;
+}
+
+void ordenarLista_MIO(tLista *p, int (*comparar)(const void *, const void *))
+{
+    tNodo *ini = *p,
+          *r = NULL,
+          *nodoEncontrado;
+
+    int cantNodos;
+
+    //Si la lista está vacía, no hay ordenamiento
+    if(!ini)
+        return;
+
+    //Posicionamos INI al comienzo
+    while(ini->ant)
+        ini = ini->ant;
+
+    //Mientras INI tenga un nodo siguiente
+    while(ini->sig)
+    {
+        //Si R es NULL
+        if(!r)
+        {
+            cantNodos = getCantidadNodosDesdeIni(ini);
+            nodoEncontrado = buscarMasRepetido(ini, cantNodos);    //Comienza a buscar el dni mas Repetido
+            r = ini;                                               //Ponemos R en INI
+        }
+        //Si R apunta al dni mas repetido
+        if(comparar(r->info, nodoEncontrado->info) == 0)
+        {
+            //e INI y R apuntan al mismo Nodo,
+            if(ini == r)
+            {
+                r = r->sig;     //Ambos Avanzan al siguiente
+                ini = ini->sig;
+            }
+            //si no, comenzamos el cableado
+            else
+            {
+                //PROCESO DE CABLEADO:
+                tNodo *aux = r->ant; //esto esta bien??
+
+                if((r->ant->sig = r->sig) != NULL)
+                    r->sig->ant = r->ant;
+
+                if(ini->ant)
+                    ini->ant->sig = r;
+
+                r->ant = ini->ant;
+                ini->ant = r;
+                r->sig = ini;
+                r = aux->sig;
+            }
+        }
+        //si no, R avanza al siguiente
+        else r = r->sig;
+    }
+}
