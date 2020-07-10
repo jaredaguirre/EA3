@@ -85,3 +85,26 @@ void limpiarVector(long * ptr, size_t tam)
     for(i = 0; i<tam; ++i)
         ptr[i]=0;
 }
+
+
+long normalizarDNI(char *dniEnTexto)
+{
+    char vDni[10];
+    char * ptr = vDni;
+
+    while (*dniEnTexto)
+    {
+        if (*dniEnTexto > 47 &&
+            *dniEnTexto < 58)
+            {
+                *ptr = *dniEnTexto;
+                ptr++;
+            }
+        dniEnTexto++;
+
+    }
+    *ptr = '\0';
+
+    return atol(vDni);
+
+}
